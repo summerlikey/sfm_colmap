@@ -1,0 +1,5 @@
+#忽略build文件夹cmake建立
+build
+
+#忽略cmake-build-debug文件夹clion建立
+cmake-build-debug
