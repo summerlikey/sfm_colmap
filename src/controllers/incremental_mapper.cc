@@ -318,7 +318,7 @@ void IncrementalMapperController::Run() {
 
   IncrementalMapper::Options init_mapper_options = options_->Mapper();
   Reconstruct(init_mapper_options);
-
+std::cout<<"init_mapper_options"<<std::endl;
   const size_t kNumInitRelaxations = 2;
   for (size_t i = 0; i < kNumInitRelaxations; ++i) {
     if (reconstruction_manager_->Size() > 0 || IsStopped()) {
@@ -337,8 +337,7 @@ void IncrementalMapperController::Run() {
     init_mapper_options.init_min_tri_angle /= 2;
     Reconstruct(init_mapper_options);
   }
-
-  std::cout << std::endl;
+    std::cout<<"incremental_mapper"<<std::endl;
   GetTimer().PrintMinutes();
 }
 
@@ -491,7 +490,7 @@ void IncrementalMapperController::Reconstruct(
     ////////////////////////////////////////////////////////////////////////////
     // Incremental mapping
     ////////////////////////////////////////////////////////////////////////////
-
+    //增量sfm
     size_t snapshot_prev_num_reg_images = reconstruction.NumRegImages();
     size_t ba_prev_num_reg_images = reconstruction.NumRegImages();
     size_t ba_prev_num_points = reconstruction.NumPoints3D();
@@ -511,7 +510,8 @@ void IncrementalMapperController::Reconstruct(
       if (next_images.empty()) {
         break;
       }
-      
+
+      //增量图像循环
       for (size_t reg_trial = 0; reg_trial < next_images.size(); ++reg_trial) {
         const image_t next_image_id = next_images[reg_trial];
         const Image& next_image = reconstruction.Image(next_image_id);
@@ -577,6 +577,7 @@ void IncrementalMapperController::Reconstruct(
         }
       }
 
+
       const size_t max_model_overlap =
           static_cast<size_t>(options_->max_model_overlap);
       if (mapper.NumSharedRegImages() >= max_model_overlap) {
@@ -594,6 +595,7 @@ void IncrementalMapperController::Reconstruct(
         prev_reg_next_success = reg_next_success;
       }
     }
+    //增量循环结结束
 
     if (IsStopped()) {
       const bool kDiscardReconstruction = false;
@@ -622,7 +624,7 @@ void IncrementalMapperController::Reconstruct(
       const bool kDiscardReconstruction = false;
       mapper.EndReconstruction(kDiscardReconstruction);
     }
-
+    //增量结束后进入回调，然后输出
     Callback(LAST_IMAGE_REG_CALLBACK);
 
     const size_t max_num_models = static_cast<size_t>(options_->max_num_models);

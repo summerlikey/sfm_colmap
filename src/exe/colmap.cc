@@ -1022,22 +1022,33 @@ int RunMapper(int argc, char** argv) {
                         const auto& reconstruction =
                                 reconstruction_manager.Get(prev_num_reconstructions);
                         CreateDirIfNotExists(reconstruction_path);
+                        //写入数据
                         reconstruction.Write(reconstruction_path);
+                        //写入project ini文件
                         options.Write(JoinPaths(reconstruction_path, "project.ini"));
                         prev_num_reconstructions = reconstruction_manager.Size();
                     }
                 });
+        
+        std::cout<<"**123***"<<std::endl;
     }
-
+    int ss = 0;
+    
+    std::cout<<"have write"<<std::endl;
+    std::cout<<ss<<std::endl;
     mapper.Start();
     mapper.Wait();
 
     // In case the reconstruction is continued from an existing reconstruction, do
     // not create sub-folders but directly write the results.
+    // write results
+    
+    std::cout<<"write results begin"<<std::endl;
     if (input_path != "" && reconstruction_manager.Size() > 0) {
         reconstruction_manager.Get(0).Write(output_path);
+        std::cout<<"input_path != """<<std::endl;
     }
-
+    std::cout<<"write results end"<<std::endl;
     return EXIT_SUCCESS;
 }
 
@@ -2109,17 +2120,124 @@ int ShowHelp(
 
     return EXIT_SUCCESS;
 }
+void run_feature_extractor(char const* char_database_path,char const* char_image_path){
+    //特征提取
+    char const* feature_string[] = {"feature_extractor","--database_path",char_database_path,"--image_path", char_image_path,"--SiftExtraction.use_gpu=false"};
+    const std::string feature_command = feature_string[0];
+    char **argv_feature = const_cast<char**>(feature_string);
+    RunFeatureExtractor(6, argv_feature);
+    std::cout<<"**********featre_extractor_success***********"<<std::endl;
+    std::cout<<"**********featre_extractor_success***********"<<std::endl;
+    std::cout<<"**********featre_extractor_success***********"<<std::endl;
+    std::cout<<"**********featre_extractor_success***********"<<std::endl;
+}
+void run_exhaustive_matcher(char const* char_database_path){
+    //特征匹配
+    // exhaustive_matcher
+    char const* exhaustive_srting[] = {"exhaustive_matcher","--database_path",char_database_path,"--SiftMatching.use_gpu=false"};
+    const std::string exhaustive_command = exhaustive_srting[0];
+    char ** argv_exhaustive= const_cast<char**>(exhaustive_srting);
+    RunExhaustiveMatcher(4, argv_exhaustive);
+    std::cout<<"***************extractor_mapper_success**************"<<std::endl;
+    std::cout<<"***************extractor_mapper_success**************"<<std::endl;
+    std::cout<<"***************extractor_mapper_success**************"<<std::endl;
+    std::cout<<"***************extractor_mapper_success**************"<<std::endl;
+}
+void run_mapper(std::string DATASET_PATH_SPARSE ,char const* char_database_path,char const* char_image_path,char const* char_sparse_path){
+    //稀疏重建
+    CreateDirIfNotExists(DATASET_PATH_SPARSE); //build the sparse directory
+    char const* mapper_string[] = {"mapper","--database_path",char_database_path,"--image_path",char_image_path,"--output_path",char_sparse_path};
+    const std::string mapper_command = mapper_string[0];
+    char ** argv_mapper = const_cast<char**>(mapper_string);
+    RunMapper(7, argv_mapper);
+    std::cout<<"*******************mapper_success****************"<<std::endl;
+    std::cout<<"*******************mapper_success****************"<<std::endl;
+    std::cout<<"*******************mapper_success****************"<<std::endl;
+    std::cout<<"*******************mapper_success****************"<<std::endl;
+}
+void run_model_converter(std::string DATASET_PATH_SPARSETXTDATA,char const* char_sparsebin,char const* char_sparsetxtdata){
+    // model_converter
+    CreateDirIfNotExists(DATASET_PATH_SPARSETXTDATA);//create the sparsetxtdata
+    char const* converter_string[] = {"model_converter","--input_path",char_sparsebin,"--output_path",char_sparsetxtdata,"--output_type","TXT"};
+    const std::string converter_command = converter_string[0];
+    char ** argv_converter = const_cast<char**>(converter_string);
+    RunModelConverter(7, argv_converter);
+    std::cout<<"*******************moder_converter_success****************"<<std::endl;
+    std::cout<<"*******************model_converter_success****************"<<std::endl;
+    std::cout<<"*******************model_converter_success****************"<<std::endl;
+    std::cout<<"*******************model_converter_success****************"<<std::endl;
+}
+void run_undistort(char const* char_image_path,char const* char_sparsebin,char const* char_dense_output){
+    //去畸变
+    //undistort
+    char const* undistort_string[] = {"image_undistorter","--image_path",char_image_path,"--input_path",char_sparsebin,"--output_path",char_dense_output,"--output_type","COLMAP","max_image_size","2000"};
+    const std::string undistort_command = undistort_string[0];
+    char ** argv_undistort = const_cast<char**>(undistort_string);
+    RunImageUndistorter(11, argv_undistort);
+    std::cout<<"*******************undistort_success****************"<<std::endl;
+    std::cout<<"*******************undistort_success****************"<<std::endl;
+    std::cout<<"*******************undistort_success****************"<<std::endl;
+    std::cout<<"*******************undistort_success****************"<<std::endl;
 
+}
+void project_run(std::string path){
 
+    std::cout<<"now begin to edit"<< std::endl;
+    //edit the DATASET_PATH!!!
+    std::cout<<"please cin the DATASET_PATH"<<std::endl;
+    std::string DATASET_PATH = path;
+    std::string DATASET_PATH_IMAGE=DATASET_PATH + "images";
+    std::string DATASET_PATH_DATABASE = DATASET_PATH + "database.db";
+    std::string DATASET_PATH_SPARSE = DATASET_PATH + "sparse";
+    std::string DATASET_PATH_BIN_IN = DATASET_PATH + "sparse/0";
+    std::string DATASET_PATH_SPARSETXTDATA = DATASET_PATH + "sparsetxtdata";
+    //undistort
+    std::string DATASET_PATH_SPARSE_PATH = DATASET_PATH + "sparse/0";
+    std::string DATASET_PATH_DENSE_OUTPUT = DATASET_PATH + "dense";
+    std::cout<<DATASET_PATH<<std::endl;
+    char const* char_image_path = DATASET_PATH_IMAGE.c_str();
+    char const* char_database_path = DATASET_PATH_DATABASE.c_str();
+    char const* char_sparse_path = DATASET_PATH_SPARSE.c_str();
+    char const* char_sparsetxtdata = DATASET_PATH_SPARSETXTDATA.c_str();
+    char const* char_sparsebin = DATASET_PATH_BIN_IN.c_str();
+    //undistort
+    char const* char_dense_output = DATASET_PATH_DENSE_OUTPUT.c_str();
+    //特征提取
+    run_feature_extractor(char_database_path,char_image_path);
+    //特征点匹配
+    run_exhaustive_matcher(char_database_path);
+    //稀疏重建
+    run_mapper(DATASET_PATH_SPARSE ,char_database_path,char_image_path,char_sparse_path);
+    //模型转换
+    run_model_converter(DATASET_PATH_SPARSETXTDATA,char_sparsebin,char_sparsetxtdata);
+    //去畸变
+    run_undistort(char_image_path,char_sparsebin,char_dense_output);
+}
+//输入文件夹路径,其中包括images文件夹
+int Project_Run(std::string path){
+    std::cout<<"now begin to edit"<< std::endl;
+    //edit the DATASET_PATH!!!
+    std::cout<<"please cin the DATASET_PATH"<<std::endl;
+    std::string DATASET_PATH = path;
+    std::string DATASET_PATH_IMAGE=DATASET_PATH + "images";
+    std::string DATASET_PATH_DATABASE = DATASET_PATH + "database.db";
+    std::string DATASET_PATH_SPARSE = DATASET_PATH + "sparse";
+    std::string DATASET_PATH_BIN_IN = DATASET_PATH + "sparse/0";
+    std::string DATASET_PATH_SPARSETXTDATA = DATASET_PATH + "sparsetxtdata";
+    //undistort
+    std::string DATASET_PATH_SPARSE_PATH = DATASET_PATH + "sparse/0";
+    std::string DATASET_PATH_DENSE_OUTPUT = DATASET_PATH + "dense";
+    std::cout<<DATASET_PATH<<std::endl;
+    char const* char_image_path = DATASET_PATH_IMAGE.c_str();
+    char const* char_database_path = DATASET_PATH_DATABASE.c_str();
+    char const* char_sparse_path = DATASET_PATH_SPARSE.c_str();
+    char const* char_sparsetxtdata = DATASET_PATH_SPARSETXTDATA.c_str();
+    char const* char_sparsebin = DATASET_PATH_BIN_IN.c_str();
+    //undistort
+    char const* char_dense_output = DATASET_PATH_DENSE_OUTPUT.c_str();
 
-int main(int argc, char** argv) {
-    InitializeGlog(argv);
-
-    // remerber the use time
-    clock_t start_Time,end_Time;
-    start_Time = clock();
-    end_Time = clock();
-
+    //调用函数
+    // remerber the use tim
     std::vector<std::pair<std::string, command_func_t>> commands;
     commands.emplace_back("gui", &RunGraphicalUserInterface);
     commands.emplace_back("automatic_reconstructor", &RunAutomaticReconstructor);
@@ -2160,36 +2278,14 @@ int main(int argc, char** argv) {
     commands.emplace_back("vocab_tree_builder", &RunVocabTreeBuilder);
     commands.emplace_back("vocab_tree_matcher", &RunVocabTreeMatcher);
     commands.emplace_back("vocab_tree_retriever", &RunVocabTreeRetriever);
-
-    //modification
-    std::cout<<"now begin to edit"<< std::endl;
-    //edit the DATASET_PATH!!!
-    std::cout<<"please cin the DATASET_PATH"<<std::endl;
-    std::string DATASET_PATH="/home/ganggang/Documents/colmap-test/test7/";
-    std::string DATASET_PATH_IMAGE=DATASET_PATH + "images";
-    std::string DATASET_PATH_DATABASE = DATASET_PATH + "database.db";
-    std::string DATASET_PATH_SPARSE = DATASET_PATH + "sparse";
-    std::string DATASET_PATH_BIN_IN = DATASET_PATH + "sparse/0";
-    std::string DATASET_PATH_SPARSETXTDATA = DATASET_PATH + "sparsetxtdata";
-    //undistort
-    std::string DATASET_PATH_SPARSE_PATH = DATASET_PATH + "sparse/0";
-    std::string DATASET_PATH_DENSE_OUTPUT = DATASET_PATH + "dense";
-    std::cout<<DATASET_PATH<<std::endl;
-    char const* char_image_path = DATASET_PATH_IMAGE.c_str();
-    char const* char_database_path = DATASET_PATH_DATABASE.c_str();
-    char const* char_sparse_path = DATASET_PATH_SPARSE.c_str();
-    char const* char_sparsetxtdata = DATASET_PATH_SPARSETXTDATA.c_str();
-    char const* char_sparsebin = DATASET_PATH_BIN_IN.c_str();
-    //undistort
-    char const* char_dense_output = DATASET_PATH_DENSE_OUTPUT.c_str();
-    
     command_func_t matched_command_func = nullptr;
     // feature_extractor
+    //特征提取
     // "/home/ganggang/Documents/colmap-test/test6/database.db"
     char const* feature_string[] = {"feature_extractor","--database_path",char_database_path,"--image_path", char_image_path,"--SiftExtraction.use_gpu=false"};
     const std::string feature_command = feature_string[0];
     char **argv_feature = const_cast<char**>(feature_string);
-    argv_feature[0] = argv[0];
+    //argv_feature[0] = argv[0];
     //matched_command_func = &RunFeatureExtractor;
     //
     for (const auto& command_func : commands) {
@@ -2212,14 +2308,13 @@ int main(int argc, char** argv) {
         std::cout<<"**********featre_extractor_success***********"<<std::endl;
         std::cout<<"**********featre_extractor_success***********"<<std::endl;
     }
-    end_Time = clock();
-    std::cout<<"The feature_extractor time: "<<double(end_Time-start_Time)<<std::endl;
 
+    //特征匹配
     // exhaustive_matcher
     char const* exhaustive_srting[] = {"exhaustive_matcher","--database_path",char_database_path,"--SiftMatching.use_gpu=false"};
     const std::string exhaustive_command = exhaustive_srting[0];
     char ** argv_exhaustive= const_cast<char**>(exhaustive_srting);
-    argv_exhaustive[0] = argv[0];
+    //argv_exhaustive[0] = argv[0];
     matched_command_func = nullptr;
     //
     for (const auto& command_func : commands) {
@@ -2242,15 +2337,14 @@ int main(int argc, char** argv) {
         std::cout<<"***************extractor_mapper_success**************"<<std::endl;
         std::cout<<"***************extractor_mapper_success**************"<<std::endl;
     }
-    end_Time = clock();
-    std::cout<<"The match_feature_extractor time: "<<double(end_Time-start_Time)<<std::endl;
 
-    // mapper
+
+    //稀疏重建
     CreateDirIfNotExists(DATASET_PATH_SPARSE); //build the sparse directory
     char const* mapper_string[] = {"mapper","--database_path",char_database_path,"--image_path",char_image_path,"--output_path",char_sparse_path};
     const std::string mapper_command = mapper_string[0];
     char ** argv_mapper = const_cast<char**>(mapper_string);
-    argv_mapper[0] = argv[0];
+    //argv_mapper[0] = argv[0];
     matched_command_func = nullptr;
     //
     for (const auto& command_func : commands) {
@@ -2273,16 +2367,13 @@ int main(int argc, char** argv) {
         std::cout<<"*******************mapper_success****************"<<std::endl;
         std::cout<<"*******************mapper_success****************"<<std::endl;
     }
-    end_Time = clock();
-    std::cout<<"The mapper time: "<<double(end_Time-start_Time)<<std::endl;
-    
-    
+
     // model_converter
     CreateDirIfNotExists(DATASET_PATH_SPARSETXTDATA);//create the sparsetxtdata
     char const* converter_string[] = {"model_converter","--input_path",char_sparsebin,"--output_path",char_sparsetxtdata,"--output_type","TXT"};
     const std::string converter_command = converter_string[0];
     char ** argv_converter = const_cast<char**>(converter_string);
-    argv_converter[0] = argv[0];
+    //argv_converter[0] = argv[0];
     matched_command_func = nullptr;
     //
     for (const auto& command_func : commands) {
@@ -2305,12 +2396,12 @@ int main(int argc, char** argv) {
         std::cout<<"*******************model_converter_success****************"<<std::endl;
         std::cout<<"*******************model_converter_success****************"<<std::endl;
     }
-    
+
     //undistort
     char const* undistort_string[] = {"image_undistorter","--image_path",char_image_path,"--input_path",char_sparsebin,"--output_path",char_dense_output,"--output_type","COLMAP","max_image_size","2000"};
     const std::string undistort_command = undistort_string[0];
     char ** argv_undistort = const_cast<char**>(undistort_string);
-    argv_undistort[0] = argv[0];
+    //argv_undistort[0] = argv[0];
     matched_command_func = nullptr;
     //
     for (const auto& command_func : commands) {
@@ -2333,9 +2424,16 @@ int main(int argc, char** argv) {
         std::cout<<"*******************undistort_success****************"<<std::endl;
         std::cout<<"*******************undistort_success****************"<<std::endl;
     }
-    
+    return 0;
+}
+
+int main(int argc, char** argv) {
+    InitializeGlog(argv);
+    // remerber the use tim
+    std::string path = "/home/ganggang/Documents/colmap-test/test1/";
+    //Project_Run(path);
+    project_run(path);
     std::cout<<"edit all down end"<<std::endl;
     //end modification
-
     return 0;
 }

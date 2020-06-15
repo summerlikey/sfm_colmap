@@ -1858,7 +1858,7 @@ void Reconstruction::WriteCamerasBinary(const std::string& path) const {
   CHECK(file.is_open()) << path;
 
   WriteBinaryLittleEndian<uint64_t>(&file, cameras_.size());
-
+    //写入相机数据
   for (const auto& camera : cameras_) {
       //id
     WriteBinaryLittleEndian<camera_t>(&file, camera.first);
